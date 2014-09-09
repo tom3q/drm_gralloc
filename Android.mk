@@ -26,6 +26,7 @@ DRM_GPU_DRIVERS := $(strip $(filter-out swrast, $(BOARD_GPU_DRIVERS)))
 intel_drivers := i915 i965 i915g ilo
 radeon_drivers := r300g r600g
 nouveau_drivers := nouveau
+openfimg_drivers := openfimg
 vmwgfx_drivers := vmwgfx
 
 valid_drivers := \
@@ -33,6 +34,7 @@ valid_drivers := \
 	$(intel_drivers) \
 	$(radeon_drivers) \
 	$(nouveau_drivers) \
+	$(openfimg_drivers) \
 	$(vmwgfx_drivers)
 
 # warn about invalid drivers
@@ -114,6 +116,13 @@ LOCAL_SRC_FILES += gralloc_drm_nouveau.c
 LOCAL_C_INCLUDES += external/drm/nouveau
 LOCAL_CFLAGS += -DENABLE_NOUVEAU
 LOCAL_SHARED_LIBRARIES += libdrm_nouveau
+endif
+
+ifneq ($(filter $(openfimg_drivers), $(DRM_GPU_DRIVERS)),)
+LOCAL_SRC_FILES += gralloc_drm_openfimg.c
+LOCAL_C_INCLUDES += external/drm/freedreno
+LOCAL_CFLAGS += -DENABLE_OPENFIMG
+LOCAL_SHARED_LIBRARIES += libdrm_freedreno
 endif
 
 ifeq ($(strip $(DRM_USES_PIPE)),true)

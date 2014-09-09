@@ -84,6 +84,10 @@ init_drv_from_fd(int fd)
 		if (!drv && !strcmp(version->name, "nouveau"))
 			drv = gralloc_drm_drv_create_for_nouveau(fd);
 #endif
+#ifdef ENABLE_OPENFIMG
+		if (!drv && !strcmp(version->name, "exynos"))
+			drv = gralloc_drm_drv_create_for_openfimg(fd);
+#endif
 	}
 
 	if (!drv) {
