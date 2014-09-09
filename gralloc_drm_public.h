@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-/*
- * Android graphics.h defines the formats and leaves 0x100 - 0x1FF
- * range available for HAL implementation specific formats.
- */
-
-#ifndef GRALLOC_DRM_FORMATS_H
-#define GRALLOC_DRM_FORMATS_H
+#ifndef GRALLOC_DRM_PUBLIC_H
+#define GRALLOC_DRM_PUBLIC_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*
+ * Android graphics.h defines the formats and leaves 0x100 - 0x1FF
+ * range available for HAL implementation specific formats.
+ */
 enum {
+    HAL_PIXEL_FORMAT_DRM_NV12 = 0x102,
+};
 
-	HAL_PIXEL_FORMAT_DRM_NV12 = 0x102,
+/* used with the 'perform' method of gralloc_module_t */
+enum {
+    GRALLOC_MODULE_PERFORM_GET_DRM_FD                = 0x80000002,
+    GRALLOC_MODULE_PERFORM_GET_DRM_MAGIC             = 0x80000003,
+    GRALLOC_MODULE_PERFORM_AUTH_DRM_MAGIC            = 0x80000004,
+    GRALLOC_MODULE_PERFORM_ENTER_VT                  = 0x80000005,
+    GRALLOC_MODULE_PERFORM_LEAVE_VT                  = 0x80000006,
 };
 
 #ifdef __cplusplus
@@ -36,4 +43,3 @@ enum {
 #endif
 
 #endif
-
