@@ -127,6 +127,7 @@ void gralloc_drm_bo_decref(struct gralloc_drm_bo_t *bo);
 struct gralloc_drm_bo_t *gralloc_drm_bo_from_handle(buffer_handle_t handle);
 buffer_handle_t gralloc_drm_bo_get_handle(struct gralloc_drm_bo_t *bo, int *stride);
 int gralloc_drm_get_gem_handle(buffer_handle_t handle);
+int gralloc_drm_get_gem_fd(buffer_handle_t handle);
 void gralloc_drm_resolve_format(buffer_handle_t _handle, uint32_t *pitches, uint32_t *offsets, uint32_t *handles);
 unsigned int planes_for_format(struct gralloc_drm_t *drm, int hal_format);
 

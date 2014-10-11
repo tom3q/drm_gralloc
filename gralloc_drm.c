@@ -37,6 +37,7 @@
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
 #define GRALLOC_DRM_DEVICE "/dev/dri/card0"
+#define GRALLOC_DRM_RENDER "/dev/dri/renderD128"
 
 static int32_t gralloc_drm_pid = 0;
 
@@ -103,6 +104,8 @@ init_drv_from_fd(int fd)
 /*
  * Create a DRM device object.
  */
+extern const char *__progname;
+
 struct gralloc_drm_t *gralloc_drm_create(void)
 {
 	struct gralloc_drm_t *drm;
@@ -112,7 +115,10 @@ struct gralloc_drm_t *gralloc_drm_create(void)
 	if (!drm)
 		return NULL;
 
-	drm->fd = open(GRALLOC_DRM_DEVICE, O_RDWR);
+	if (strstr(__progname, "surfaceflinger"))
+		drm->fd = open(GRALLOC_DRM_DEVICE, O_RDWR);
+	else
+		drm->fd = open(GRALLOC_DRM_RENDER, O_RDWR);
 	if (drm->fd < 0) {
 		ALOGE("failed to open %s", GRALLOC_DRM_DEVICE);
 		return NULL;
@@ -191,22 +197,31 @@ static struct gralloc_drm_bo_t *validate_handle(buffer_handle_t _handle,
 {
 	struct gralloc_drm_handle_t *handle = gralloc_drm_handle(_handle);
 
-	if (!handle)
+	if (!handle) {
+		ALOGE("failed to get gralloc_drm_handle_t from buffer_handle_t");
 		return NULL;
+	}
 
 	/* the buffer handle is passed to a new process */
 	if (unlikely(handle->data_owner != gralloc_drm_pid)) {
 		struct gralloc_drm_bo_t *bo;
 
 		/* check only */
-		if (!drm)
+		if (!drm) {
+			ALOGE("drm not initialized?");
 			return NULL;
+		}
 
 		/* create the struct gralloc_drm_bo_t locally */
-		if (handle->name)
+		if (handle->name || handle->fd) {
 			bo = drm->drv->alloc(drm->drv, handle);
-		else /* an invalid handle */
+			if (!bo)
+				ALOGE("failed to import bo from name");
+		}
+		else /* an invalid handle */ {
+			ALOGE("invalid handle (name == NULL)");
 			bo = NULL;
+		}
 		if (bo) {
 			bo->drm = drm;
 			bo->imported = 1;
@@ -360,6 +375,12 @@ int gralloc_drm_get_gem_handle(buffer_handle_t _handle)
 {
 	struct gralloc_drm_handle_t *handle = gralloc_drm_handle(_handle);
 	return (handle) ? handle->name : 0;
+}
+
+int gralloc_drm_get_gem_fd(buffer_handle_t _handle)
+{
+	struct gralloc_drm_handle_t *handle = gralloc_drm_handle(_handle);
+	return (handle) ? handle->fd : 0;
 }
 
 /*
